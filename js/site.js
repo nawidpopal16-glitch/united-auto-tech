@@ -94,7 +94,7 @@
     return h12 + (min ? ':' + String(min).padStart(2, '0') : '') + ' ' + suffix;
   }
 
-  /* Returns { open: bool, text: "Open now until 5 pm" | "Closed now, opens Tuesday at 9 am" } */
+  /* Returns { open: bool, text: "Open now until 5 pm" | "Closed · opens tomorrow 9 am" } */
   function openStatus(loc) {
     var now = nowInShopTime();
     var today = loc.hours[now.day];
@@ -102,7 +102,7 @@
       return { open: true, text: 'Open now until ' + prettyTime(today[1]) };
     }
     if (today && now.minutes < toMinutes(today[0])) {
-      return { open: false, text: 'Closed now, opens today at ' + prettyTime(today[0]) };
+      return { open: false, text: 'Closed · opens today ' + prettyTime(today[0]) };
     }
     var idx = DAYS.indexOf(now.day);
     for (var i = 1; i <= 7; i++) {
@@ -110,7 +110,7 @@
       var h = loc.hours[key];
       if (h) {
         var when = i === 1 ? 'tomorrow' : DAY_NAMES[key];
-        return { open: false, text: 'Closed now, opens ' + when + ' at ' + prettyTime(h[0]) };
+        return { open: false, text: 'Closed · opens ' + when + ' ' + prettyTime(h[0]) };
       }
     }
     return { open: false, text: 'Call for hours' };
@@ -128,7 +128,7 @@
       var st = openStatus(loc);
       var badge = $('[data-open-status-card]', card);
       if (badge) {
-        badge.textContent = st.open ? 'Open now' : 'Closed now';
+        badge.textContent = st.text;
         badge.classList.toggle('is-open', st.open);
         badge.classList.toggle('is-closed', !st.open);
       }
@@ -188,9 +188,13 @@
     });
     select.addEventListener('change', function () { chooseLocation(select.value, true); });
     var stat = $('.loc-switch__static', wrap);
-    if (stat) stat.remove();
-    wrap.appendChild(label);
-    wrap.appendChild(select);
+    if (stat) {
+      stat.parentNode.insertBefore(label, stat);
+      stat.replaceWith(select);
+    } else {
+      wrap.appendChild(label);
+      wrap.appendChild(select);
+    }
     wrap.classList.add('loc-switch--picker');
   }
 
@@ -284,7 +288,7 @@
     var board = $('[data-board]');
     if (!chipsWrap || !board) return;
     var chips = $$('[data-filter]', chipsWrap);
-    var items = $$('.board__item', board);
+    var items = $$('[data-cat]', board);
     var status = $('[data-filter-status]');
     chipsWrap.hidden = false;
 
@@ -337,6 +341,26 @@
           toast(text);
         });
       });
+    });
+  }
+
+  /* ---------- Phone/tablet menu ---------- */
+
+  function wireMenu() {
+    var toggle = $('[data-menu-toggle]');
+    var menu = $('[data-menu]');
+    if (!toggle || !menu) return;
+    function setOpen(open) {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.classList.toggle('is-open', open);
+    }
+    toggle.addEventListener('click', function () { setOpen(toggle.getAttribute('aria-expanded') !== 'true'); });
+    menu.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') { setOpen(false); toggle.focus(); }
+    });
+    document.addEventListener('click', function (e) {
+      if (toggle.getAttribute('aria-expanded') === 'true' && !e.target.closest('[data-menu]') && !e.target.closest('[data-menu-toggle]')) setOpen(false);
     });
   }
 
@@ -403,6 +427,7 @@
   wireFilters();
   wireCopy();
   wireSocial();
+  wireMenu();
   applyLocation(current);
   setInterval(paintStatus, 60 * 1000);
 

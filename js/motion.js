@@ -1,4 +1,4 @@
-/* United Auto Tech: all animation lives here.
+/* United Auto Tech: all animation lives here. Crisp and quick rather than bouncy, to suit the clean look.
    GSAP + ScrollTrigger + SplitText + Lenis from vendor/.
    Nothing runs for visitors who ask for reduced motion, and if any library is missing
    the page simply shows as is (the inline failsafe in <head> also covers a missing file). */
@@ -141,20 +141,20 @@
       title.insertBefore(sr, title.firstChild);
     }
 
-    var drops = [-34, 28, -20];
+    var drops = [-22, 18, -14];
     var tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
-    tl.from('.hero__eyebrow', { y: 24, autoAlpha: 0, duration: 0.5 }, 0)
+    tl.from('.hero__eyebrow', { x: -30, autoAlpha: 0, duration: 0.5 }, 0)
       .from(chars, {
-        yPercent: 120, scale: 0.2, rotation: function () { return random(-30, 30); }, autoAlpha: 0,
-        duration: 0.9, ease: 'back.out(2.6)', stagger: 0.05
+        yPercent: 110, autoAlpha: 0,
+        duration: 0.7, ease: 'back.out(1.8)', stagger: 0.04
       }, 0.1)
       .from(cards, {
-        y: function () { return -(window.innerHeight + 260); },
+        y: function () { return -(window.innerHeight * 0.9 + 200); },
         rotation: function (i) { return drops[i % drops.length]; },
-        duration: 1.15, ease: 'bounce.out', stagger: 0.17
-      }, 0.15)
-      .from(sticker, { scale: 0, rotation: -200, autoAlpha: 0, duration: 1.4, ease: 'elastic.out(1, 0.4)' }, 0.95)
-      .from(['.hero__tagline', '.hero__ctas', '.hero__stats'], { y: 30, autoAlpha: 0, duration: 0.7, stagger: 0.1 }, 0.7)
+        duration: 1, ease: 'back.out(1.1)', stagger: 0.14
+      }, 0.2)
+      .from(sticker, { scale: 0, rotation: -120, autoAlpha: 0, duration: 1.1, ease: 'elastic.out(1, 0.55)' }, 0.9)
+      .from(['.hero__tagline', '.hero__ctas', '.hero__stats'], { y: 24, autoAlpha: 0, duration: 0.6, stagger: 0.08 }, 0.55)
       .call(function () { followMouse(hero, cards.concat(sticker ? [sticker] : [])); });
     return tl;
   }
@@ -172,7 +172,7 @@
     hero.addEventListener('pointermove', function (e) {
       var nx = e.clientX / window.innerWidth - 0.5;
       var ny = e.clientY / window.innerHeight - 0.5;
-      movers.forEach(function (m) { m.x(nx * 40 * m.depth); m.y(ny * 28 * m.depth); });
+      movers.forEach(function (m) { m.x(nx * 30 * m.depth); m.y(ny * 20 * m.depth); });
     });
     hero.addEventListener('pointerleave', function () {
       movers.forEach(function (m) { m.x(0); m.y(0); });
@@ -186,25 +186,25 @@
       var s = splitLetters(title);
       if (!s) return;
       gsap.from(s.chars, {
-        yPercent: 90, rotation: function () { return random(-16, 16); }, autoAlpha: 0,
-        duration: 0.75, ease: 'back.out(3.2)', stagger: 0.035,
+        yPercent: 80, autoAlpha: 0,
+        duration: 0.6, ease: 'back.out(2.2)', stagger: 0.025,
         scrollTrigger: { trigger: title, start: 'top 88%', once: true }
       });
     });
-    $$('.section-head .eyebrow, .section-lede').forEach(function (el) {
+    $$('.section-head .tag, .section-lede').forEach(function (el) {
       gsap.from(el, { y: 22, autoAlpha: 0, duration: 0.6, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
     });
   }
 
   function setupBoard() {
-    var items = $$('.board__item');
+    var items = $$('.svc');
     if (!items.length) return;
-    gsap.set(items, { y: 56, autoAlpha: 0 });
+    gsap.set(items, { y: 48, autoAlpha: 0 });
     ScrollTrigger.batch(items, {
       start: 'top 92%',
       once: true,
       onEnter: function (batch) {
-        gsap.to(batch, { y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out', stagger: 0.08, overwrite: true });
+        gsap.to(batch, { y: 0, autoAlpha: 1, duration: 0.7, ease: 'power3.out', stagger: 0.07, overwrite: true });
       }
     });
     document.addEventListener('services:filter', function (e) {
@@ -214,38 +214,38 @@
     });
   }
 
+  /* Gallery photos wipe open left to right, the photo settling as it is revealed. */
   function setupWall() {
-    $$('.wall__tile').forEach(function (tile, i) {
-      var fig = $('figure', tile);
-      var art = $('.wall__art', tile);
-      var tl = gsap.timeline({ scrollTrigger: { trigger: tile, start: 'top 88%', once: true }, delay: (i % 3) * 0.12 });
-      tl.fromTo(fig,
-        { clipPath: 'inset(100% 0% 0% 0% round 18px)' },
-        { clipPath: 'inset(0% 0% 0% 0% round 18px)', duration: 1, ease: 'power4.inOut', immediateRender: true,
-          onComplete: function () { gsap.set(fig, { clearProps: 'clipPath' }); } })
-        .from(art, { scale: 1.5, rotation: -25, duration: 1.1, ease: 'power3.out' }, 0.25);
+    $$('.mosaic__tile').forEach(function (tile, i) {
+      var img = $('img', tile);
+      var tl = gsap.timeline({ scrollTrigger: { trigger: tile, start: 'top 88%', once: true }, delay: (i % 2) * 0.12 });
+      tl.fromTo(tile,
+        { clipPath: 'inset(0% 100% 0% 0%)' },
+        { clipPath: 'inset(0% 0% 0% 0%)', duration: 1, ease: 'power4.inOut', immediateRender: true,
+          onComplete: function () { gsap.set(tile, { clearProps: 'clipPath' }); } })
+        .from(img, { scale: 1.25, duration: 1.3, ease: 'power3.out', clearProps: 'transform' }, 0.1);
     });
-    $$('.shop__foot').forEach(function (el) {
-      gsap.from(el, { y: 30, autoAlpha: 0, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
+    $$('.gallery__foot').forEach(function (el) {
+      gsap.from(el, { y: 26, autoAlpha: 0, duration: 0.6, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 94%', once: true } });
     });
   }
 
-  /* Cards toss in like they were thrown onto a bench. */
+  /* Cards toss in: a short arc with a little spin, landing square. */
   function setupCards() {
     $$('[data-cards]').forEach(function (group) {
       var cards = Array.prototype.slice.call(group.children);
       gsap.from(cards, {
-        y: 240, x: function () { return random(-140, 140); }, rotation: function () { return random(-30, 30); },
-        autoAlpha: 0, duration: 1.1, ease: 'back.out(1.5)', stagger: 0.12,
+        y: 160, x: function () { return random(-60, 60); }, rotation: function () { return random(-10, 10); },
+        autoAlpha: 0, duration: 0.9, ease: 'back.out(1.3)', stagger: 0.1,
         scrollTrigger: { trigger: group, start: 'top 86%', once: true }
       });
     });
-    $$('.story__body > *').forEach(function (el) {
+    $$('.why__story > *').forEach(function (el) {
       gsap.from(el, { y: 30, autoAlpha: 0, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
     });
   }
 
-  /* ---------- Tire-sidewall marquee: rolls on its own, spins up with scroll speed ---------- */
+  /* ---------- Ticker bands: roll on their own, speed up with scroll speed ---------- */
 
   function setupTread() {
     var treads = $$('[data-tread]').map(function (el) {
@@ -285,16 +285,16 @@
     var s = splitLetters(el);
     if (!s) return;
     gsap.from(s.chars, {
-      yPercent: -170, rotation: function () { return random(-35, 35); }, autoAlpha: 0,
-      duration: 1.2, ease: 'bounce.out', stagger: { each: 0.05, from: 'random' },
+      yPercent: -120, autoAlpha: 0,
+      duration: 0.9, ease: 'back.out(1.6)', stagger: { each: 0.035, from: 'start' },
       scrollTrigger: { trigger: el, start: 'top 94%', once: true }
     });
     s.chars.forEach(function (ch) {
       ch.addEventListener('pointerenter', function () {
         if (gsap.isTweening(ch)) return;
         gsap.timeline()
-          .to(ch, { y: '-0.24em', rotation: random(-14, 14), duration: 0.18, ease: 'power2.out' })
-          .to(ch, { y: 0, rotation: 0, duration: 0.7, ease: 'bounce.out' });
+          .to(ch, { y: '-0.14em', color: '#d71920', duration: 0.16, ease: 'power2.out' })
+          .to(ch, { y: 0, color: '#ffffff', duration: 0.5, ease: 'back.out(3)' });
       });
     });
   }
@@ -311,7 +311,7 @@
         var r = btn.getBoundingClientRect();
         var dx = e.clientX - (r.left + r.width / 2);
         var dy = e.clientY - (r.top + r.height / 2);
-        xTo(dx * 0.28); yTo(dy * 0.4); rTo(dx * 0.05);
+        xTo(dx * 0.2); yTo(dy * 0.3); rTo(dx * 0.03);
       });
       btn.addEventListener('pointerleave', function () { xTo(0); yTo(0); rTo(0); });
     });
@@ -374,7 +374,7 @@
     if (treadTick) gsap.ticker.remove(treadTick);
     ScrollTrigger.getAll().forEach(function (st) { st.kill(); });
     gsap.globalTimeline.getChildren(true, true, true).forEach(function (t) { t.kill(); });
-    gsap.set($$('.hero *, .board__item, .wall__tile, .wall__tile *, [data-cards] > *, .section-head *, .story__body > *, .shop__foot, .loader, .loader *, .tread__track'), { clearProps: 'all' });
+    gsap.set($$('.hero *, .svc, .mosaic__tile, .mosaic__tile *, [data-cards] > *, .section-head *, .why__story > *, .gallery__foot, .footer-name *, .loader, .loader *, .tread__track, [data-magnetic]'), { clearProps: 'all' });
     if (lenis) { lenis.destroy(); window.__lenis = null; }
     release();
     if (window.console && console.warn) console.warn('motion.js disabled:', err);
